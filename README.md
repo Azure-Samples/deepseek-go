@@ -88,6 +88,21 @@ docker build -t deepseek-go .
 docker run -p 3000:3000 --env-file .env deepseek-go
 ```
 
+### GitHub Codespaces Development
+
+1. Click the "Code" button on the repository and select "Open with Codespaces"
+2. Wait for the devcontainer to build and initialize
+3. Copy `.env.example` to `.env` and update with your Azure credentials:
+   ```bash
+   cp .env.example .env
+   ```
+4. Run the application:
+   ```bash
+   go run main.go
+   ```
+
+The application will be available on port 3000, which is automatically forwarded by Codespaces.
+
 ## Deployment
 
 ### Azure Infrastructure Setup
