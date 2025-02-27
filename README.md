@@ -1,9 +1,18 @@
+<!-- prettier-ignore -->
+<div align="center">
+
+<img src="./docs/images/icon.png" alt="" align="center" height="64" />
+
 # DeepSeek-R1 Go Starter
 
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 ![Go version](https://img.shields.io/badge/Go->=1.21-00ADD8?style=flat-square&logo=go&logoColor=white)
 
 This sample demonstrates how to build a web chat application using Go that integrates with Azure OpenAI's DeepSeek-R1 model. The application provides a web interface for interacting with the model, deployed securely using Azure Container Registry (ACR) and Azure App Service.
+
+:star: If you like this sample, star it on GitHub — it helps a lot!
+
+</div>
 
 ## Overview
 
