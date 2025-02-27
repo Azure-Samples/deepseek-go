@@ -43,7 +43,7 @@ This application showcases how to build an AI chat application using Go, with fe
 
 ### Prerequisites
 
-- Go 1.21 or later
+- Go 1.23 or later
 - Docker
 - Azure CLI
 - Terraform CLI
