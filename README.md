@@ -1,7 +1,8 @@
 <!-- prettier-ignore -->
 <div align="center">
 
-<img src="./docs/images/icon.png" alt="" align="center" height="64" />
+<img src="./docs/images/icon.png" alt="" align="center" height="64" /> <img src="./docs/images/go-logo.png" alt="" align="center" height="104" />
+
 
 # DeepSeek-R1 Go Starter
 
