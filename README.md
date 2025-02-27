@@ -6,6 +6,7 @@
 
 # DeepSeek-R1 Go Starter
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Azure-Samples/deepseek-go)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 ![Go version](https://img.shields.io/badge/Go->=1.23-00ADD8?style=flat-square&logo=go&logoColor=white)
 
