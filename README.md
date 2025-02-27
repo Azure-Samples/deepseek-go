@@ -6,8 +6,9 @@
 
 # DeepSeek-R1 Go Starter
 
+[![Open in GitHub Codespaces](https://img.shields.io/badge/Open_in_GitHub_Codespaces-181717?style=flat-square&logo=github&logoColor=white)](https://codespaces.new/Azure-Samples/deepseek-go)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
-![Go version](https://img.shields.io/badge/Go->=1.21-00ADD8?style=flat-square&logo=go&logoColor=white)
+![Go version](https://img.shields.io/badge/Go->=1.23-00ADD8?style=flat-square&logo=go&logoColor=white)
 
 This sample demonstrates how to build a web chat application using Go that integrates with Azure OpenAI's DeepSeek-R1 model. The application provides a web interface for interacting with the model, deployed securely using Azure Container Registry (ACR) and Azure App Service.
 
@@ -87,6 +88,21 @@ Build and run the application using Docker:
 docker build -t deepseek-go .
 docker run -p 3000:3000 --env-file .env deepseek-go
 ```
+
+### GitHub Codespaces Development
+
+1. Click the "Code" button on the repository and select "Open with Codespaces"
+2. Wait for the devcontainer to build and initialize
+3. Copy `.env.example` to `.env` and update with your Azure credentials:
+   ```bash
+   cp .env.example .env
+   ```
+4. Run the application:
+   ```bash
+   go run main.go
+   ```
+
+The application will be available on port 3000, which is automatically forwarded by Codespaces.
 
 ## Deployment
 
