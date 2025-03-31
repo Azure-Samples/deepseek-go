@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -11,6 +12,9 @@ import (
 	"os"
 	"sync"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/joho/godotenv"
 )
 
@@ -51,12 +55,43 @@ var (
 	isProcessing bool
 )
 
+var cred azcore.TokenCredential
+
 func main() {
+
 	// Load configuration
 	config, err := VarsConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Configuration error: %v\n", err)
 		return
+	}
+
+	clientID := os.Getenv("AZURE_CLIENT_ID")
+	productionEnvironment := os.Getenv("RUNNING_IN_PRODUCTION")
+
+	if productionEnvironment == "true" {
+		log.Println("Running in production environment.")
+
+		// log.WithField("azure_client_id", clientID).Debug("Using Azure AD authentication with managed identity.")
+		c, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
+			ID: azidentity.ClientID(clientID),
+		})
+		if err != nil {
+			// return nil, trace.Wrap(err)
+			return
+		}
+		cred = c
+	} else {
+		// log.Debug("Using Azure AD authentication with default credentials.")
+		c, err := azidentity.NewAzureDeveloperCLICredential(&azidentity.AzureDeveloperCLICredentialOptions{
+			TenantID: os.Getenv("AZURE_TENANT_ID"),
+		})
+		if err != nil {
+			// return nil, trace.Wrap(err)
+			return
+		}
+		cred = c
+		log.Println("Using Azure AD authentication with AZD credentials." + os.Getenv("AZURE_TENANT_ID"))
 	}
 
 	// Serve static files from the "static" directory (index.html and styles.css)
@@ -86,19 +121,27 @@ func VarsConfig() (*Config, error) {
 	}
 
 	// Load Azure OpenAI API key
-	azureOpenAIKey := os.Getenv("AZURE_OPENAI_API_KEY")
-	if azureOpenAIKey == "" {
-		return nil, fmt.Errorf("AZURE_OPENAI_API_KEY not set")
+	// azureOpenAIKey := os.Getenv("AZURE_OPENAI_API_KEY")
+	// if azureOpenAIKey == "" {
+	// 	return nil, fmt.Errorf("AZURE_OPENAI_API_KEY not set")
+	// }
+
+	// load inference endpoint
+	azureInferenceEndpoint := os.Getenv("AZURE_INFERENCE_ENDPOINT")
+	if azureInferenceEndpoint == "" {
+		return nil, fmt.Errorf("AZURE_INFERENCE_ENDPOINT not set")
 	}
+
+	modelDeploymentURL := azureInferenceEndpoint + "/chat/completions?api-version=2024-05-01-preview"
 
 	// Load the model deployment URL
-	modelDeploymentURL := os.Getenv("MODEL_DEPLOYMENT_URL")
-	if modelDeploymentURL == "" {
-		return nil, fmt.Errorf("MODEL_DEPLOYMENT_URL not set")
-	}
+	// modelDeploymentURL := os.Getenv("MODEL_DEPLOYMENT_URL")
+	// if modelDeploymentURL == "" {
+	// 	return nil, fmt.Errorf("MODEL_DEPLOYMENT_URL not set")
+	// }
 
 	// Load the model name
-	modelName := os.Getenv("MODEL_NAME")
+	modelName := os.Getenv("AZURE_DEEPSEEK_DEPLOYMENT")
 	// Set the default model name if it is not provided.
 	if modelName == "" {
 		modelName = "DeepSeek-R1" // default model name
@@ -109,7 +152,7 @@ func VarsConfig() (*Config, error) {
 
 	// Return the config struct populated with the settings
 	return &Config{
-		AzureOpenAIKey:     azureOpenAIKey,
+		// AzureOpenAIKey:     azureOpenAIKey,
 		ModelDeploymentURL: modelDeploymentURL,
 		ModelName:          modelName,
 		Port:               "3000", // Default port number
@@ -224,9 +267,18 @@ func (h *handlers) makeRESTCall(messages []Message) (string, error) {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 
+	//move to main
+	ctx := context.Background()
+	token, err := cred.GetToken(ctx, policy.TokenRequestOptions{
+		Scopes: []string{"https://cognitiveservices.azure.com/.default"},
+	})
+
+	// query token refresh before every request
+
 	// Set the headers for the request
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("api-key", h.config.AzureOpenAIKey)
+	// req.Header.Set("api-key", h.config.AzureOpenAIKey) // set api key in header if using api key
+	req.Header.Set("Authorization", "Bearer"+" "+token.Token)
 
 	// Initialize a new HTTP client and send the request
 	client := &http.Client{}

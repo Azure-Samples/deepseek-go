@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: deepseek-go
+metadata:
+  template: deepseek-go@0.1.0
+requiredVersions:
+    azd: ">= 1.13.0" # >1.13 is needed for docker as a language support
+services:
+  aca:
+    project: ./src
+    language: docker
+    host: containerapp
+    docker:
+      remoteBuild: true
+pipeline:
+  variables:
+    - SERVICE_ACA_RESOURCE_EXISTS
+    - DISABLE_KEY_BASED_AUTH

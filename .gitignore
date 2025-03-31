@@ -36,3 +36,7 @@ build/
 
 # macOS metadata
 .DS_Store
+
+# azd evironment files
+.azure
+

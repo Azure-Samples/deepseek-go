@@ -13,6 +13,5 @@ FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /app/server .
 COPY --from=builder /app/static ./static
-COPY .env .env
 EXPOSE 3000
 CMD ["./server"]
