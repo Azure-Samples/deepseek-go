@@ -29,11 +29,11 @@ This template, the application code and configuration it contains, has been buil
   - Azure Container Registry for image storage
   - Azure AI Services for DeepSeek-R1 model deployment
   - Azure Log Analytics for monitoring
-  - azd Deployment time ~5mins
+  - Quick deployment with the azd CLI (approximately 5 minutes)
 - **IaC**: Bicep for infrastructure deployment
 - **Web Interface**: HTML/CSS with vanilla JavaScript
 
-![ai chat window](./docs/images/ai-chat-window.png)
+![Screenshot of AI chat window](./docs/images/ai-chat-window.png)
 ![azure deployment architecture diagram](./docs/images/deepseek-go-architecture-diagram.png)
 
 
