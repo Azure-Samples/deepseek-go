@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
@@ -267,13 +268,31 @@ func (h *handlers) makeRESTCall(messages []Message) (string, error) {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 
-	//move to main
+	// Get token for Azure Cognitive Services
 	ctx := context.Background()
 	token, err := cred.GetToken(ctx, policy.TokenRequestOptions{
 		Scopes: []string{"https://cognitiveservices.azure.com/.default"},
 	})
+	if err != nil {
+		return "", fmt.Errorf("failed to get authentication token: %w", err)
+	}
 
-	// query token refresh before every request
+	// Check if token has expired and refresh if necessary
+	// Note: The token expiration time is not always accurate, so we check if the token is expired
+	now := time.Now()
+	if now.After(token.ExpiresOn) {
+		log.Printf("Token has expired, getting a new one")
+		newToken, err := cred.GetToken(ctx, policy.TokenRequestOptions{
+			Scopes: []string{"https://cognitiveservices.azure.com/.default"},
+		})
+		if err != nil {
+			return "", fmt.Errorf("failed to refresh authentication token: %w", err)
+		}
+		token = newToken
+	}
+
+	// Log token expiration info
+	// log.Printf("Using token that expires at: %v", token.ExpiresOn)
 
 	// Set the headers for the request
 	req.Header.Set("Content-Type", "application/json")

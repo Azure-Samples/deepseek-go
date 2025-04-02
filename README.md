@@ -80,12 +80,17 @@ The project uses Azure Bicep for infrastructure deployment, with key components:
    cd deepseek-go
    ```
 
-2. Create a .env file with required configuration:
+2. Create a `.env` file with required configuration:
+
+   > **Note:** You can copy the `.env.example` file and fill in your values.
+_To acquire the following values, after using azd to deploy the application, run the following command in your terminal: `azd env get-values | grep "AZURE_INFERENCE_ENDPOINT" && azd env get-values | grep "AZURE_TENANT_ID"`_
+
    ```
    AZURE_TENANT_ID=<your-tenant-id>
    AZURE_INFERENCE_ENDPOINT=<your-azure-ai-endpoint>
    AZURE_DEEPSEEK_DEPLOYMENT=DeepSeek-R1
    ```
+   > **Warning:** Never commit your `.env` file to source control. It's already in `.gitignore`.
 
 3. Install dependencies:
    ```bash
