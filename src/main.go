@@ -71,8 +71,6 @@ func main() {
 
 	if productionEnvironment == "true" {
 		log.Println("Running in production environment.")
-
-		// log.WithField("azure_client_id", clientID).Debug("Using Azure AD authentication with managed identity.")
 		c, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
 			ID: azidentity.ClientID(clientID),
 		})
@@ -82,7 +80,6 @@ func main() {
 		}
 		cred = c
 	} else {
-		// log.Debug("Using Azure AD authentication with default credentials.")
 		c, err := azidentity.NewAzureDeveloperCLICredential(&azidentity.AzureDeveloperCLICredentialOptions{
 			TenantID: os.Getenv("AZURE_TENANT_ID"),
 		})
@@ -227,7 +224,6 @@ func (h *handlers) chatHandler(w http.ResponseWriter, r *http.Request) {
 
 // healthHandler provides a simple health check endpoint.
 func (h *handlers) healthHandler(w http.ResponseWriter, r *http.Request) {
-	// Respond with HTTP 200 and a simple text message.
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "Healthy.")
 }
@@ -277,7 +273,7 @@ func (h *handlers) makeRESTCall(messages []Message) (string, error) {
 		token = newToken
 	}
 
-	// Log token expiration info
+	// Log token expiration info for debugging purposes
 	// log.Printf("Using token that expires at: %v", token.ExpiresOn)
 
 	// Set the headers for the request
