@@ -11,7 +11,8 @@
             "extensions": [
                 "golang.go",
                 "ms-azuretools.vscode-docker",
-                "ms-azuretools.azure-dev"
+                "ms-azuretools.azure-dev",
+                "GitHub.vscode-github-actions"
             ]
         }
     },
