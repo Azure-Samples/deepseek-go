@@ -21,7 +21,6 @@ import (
 
 // Config holds your application configuration
 type Config struct {
-	AzureOpenAIKey     string
 	ModelDeploymentURL string
 	ModelName          string
 	Port               string
@@ -72,8 +71,6 @@ func main() {
 
 	if productionEnvironment == "true" {
 		log.Println("Running in production environment.")
-
-		// log.WithField("azure_client_id", clientID).Debug("Using Azure AD authentication with managed identity.")
 		c, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
 			ID: azidentity.ClientID(clientID),
 		})
@@ -83,7 +80,6 @@ func main() {
 		}
 		cred = c
 	} else {
-		// log.Debug("Using Azure AD authentication with default credentials.")
 		c, err := azidentity.NewAzureDeveloperCLICredential(&azidentity.AzureDeveloperCLICredentialOptions{
 			TenantID: os.Getenv("AZURE_TENANT_ID"),
 		})
@@ -121,12 +117,6 @@ func VarsConfig() (*Config, error) {
 		fmt.Fprintf(os.Stderr, "Error loading .env file\n")
 	}
 
-	// Load Azure OpenAI API key
-	// azureOpenAIKey := os.Getenv("AZURE_OPENAI_API_KEY")
-	// if azureOpenAIKey == "" {
-	// 	return nil, fmt.Errorf("AZURE_OPENAI_API_KEY not set")
-	// }
-
 	// load inference endpoint
 	azureInferenceEndpoint := os.Getenv("AZURE_INFERENCE_ENDPOINT")
 	if azureInferenceEndpoint == "" {
@@ -134,12 +124,6 @@ func VarsConfig() (*Config, error) {
 	}
 
 	modelDeploymentURL := azureInferenceEndpoint + "/chat/completions?api-version=2024-05-01-preview"
-
-	// Load the model deployment URL
-	// modelDeploymentURL := os.Getenv("MODEL_DEPLOYMENT_URL")
-	// if modelDeploymentURL == "" {
-	// 	return nil, fmt.Errorf("MODEL_DEPLOYMENT_URL not set")
-	// }
 
 	// Load the model name
 	modelName := os.Getenv("AZURE_DEEPSEEK_DEPLOYMENT")
@@ -153,7 +137,6 @@ func VarsConfig() (*Config, error) {
 
 	// Return the config struct populated with the settings
 	return &Config{
-		// AzureOpenAIKey:     azureOpenAIKey,
 		ModelDeploymentURL: modelDeploymentURL,
 		ModelName:          modelName,
 		Port:               "3000", // Default port number
@@ -176,11 +159,11 @@ func (h *handlers) indexHandler(w http.ResponseWriter, r *http.Request) {
 
 // chatHandler handles incoming POST requests for chat messages, forwarding them to the REST API
 func (h *handlers) chatHandler(w http.ResponseWriter, r *http.Request) {
-	// Set headers for CORS and content type - uncomment if needed and client is on a different domain
-	// w.Header().Set("Access-Control-Allow-Origin", "*")
-	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, api-key")
-	// w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	w.Header().Set("Content-Type", "application/json")
+	/* Set headers for CORS and content type - uncomment if needed and client is on a different domain
+	** w.Header().Set("Access-Control-Allow-Origin", "*")
+	** w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	** w.Header().Set("Content-Type", "application/json")
+	 */
 
 	// Handle OPTIONS preflight requests
 	if r.Method == "OPTIONS" {
@@ -241,7 +224,6 @@ func (h *handlers) chatHandler(w http.ResponseWriter, r *http.Request) {
 
 // healthHandler provides a simple health check endpoint.
 func (h *handlers) healthHandler(w http.ResponseWriter, r *http.Request) {
-	// Respond with HTTP 200 and a simple text message.
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "Healthy.")
 }
@@ -291,12 +273,11 @@ func (h *handlers) makeRESTCall(messages []Message) (string, error) {
 		token = newToken
 	}
 
-	// Log token expiration info
+	// Log token expiration info for debugging purposes
 	// log.Printf("Using token that expires at: %v", token.ExpiresOn)
 
 	// Set the headers for the request
 	req.Header.Set("Content-Type", "application/json")
-	// req.Header.Set("api-key", h.config.AzureOpenAIKey) // set api key in header if using api key
 	req.Header.Set("Authorization", "Bearer"+" "+token.Token)
 
 	// Initialize a new HTTP client and send the request
