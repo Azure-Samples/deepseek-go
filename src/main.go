@@ -292,7 +292,7 @@ func (h *handlers) makeRESTCall(messages []Message) (string, error) {
 	}
 
 	// Log token expiration info
-	log.Printf("Using token that expires at: %v", token.ExpiresOn)
+	// log.Printf("Using token that expires at: %v", token.ExpiresOn)
 
 	// Set the headers for the request
 	req.Header.Set("Content-Type", "application/json")
