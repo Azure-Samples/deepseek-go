@@ -83,7 +83,7 @@ The project uses Azure Bicep for infrastructure deployment, with key components:
 2. Create a `.env` file with required configuration:
 
    > **Note:** You can copy the `.env.example` file and fill in your values.
-_To aquire the following values, after using azd to deploy the application, run the following command in your terminal: `azd env get-values | grep "AZURE_INFERENCE_ENDPOINT" && azd env get-values | grep "AZURE_TENANT_ID"`_
+_To acquire the following values, after using azd to deploy the application, run the following command in your terminal: `azd env get-values | grep "AZURE_INFERENCE_ENDPOINT" && azd env get-values | grep "AZURE_TENANT_ID"`_
 
    ```
    AZURE_TENANT_ID=<your-tenant-id>
