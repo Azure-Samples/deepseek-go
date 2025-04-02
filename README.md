@@ -65,54 +65,6 @@ The project uses Azure Bicep for infrastructure deployment, with key components:
 
 ## Getting Started
 
-### Prerequisites
-
-- Go v1.23 or later
-- Docker
-- Azure Developer CLI (azd) v1.13 or later _(support for docker as a language in the `azure.yaml` is required)_
-- Azure subscription with permissions to create resources
-
-### Local Development
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Azure-Samples/deepseek-go
-   cd deepseek-go
-   ```
-
-2. Create a `.env` file with required configuration:
-
-   > **Note:** You can copy the `.env.example` file and fill in your values.
-_To acquire the following values, after using azd to deploy the application, run the following command in your terminal: `azd env get-values | grep "AZURE_INFERENCE_ENDPOINT" && azd env get-values | grep "AZURE_TENANT_ID"`_
-
-   ```
-   AZURE_TENANT_ID=<your-tenant-id>
-   AZURE_INFERENCE_ENDPOINT=<your-azure-ai-endpoint>
-   AZURE_DEEPSEEK_DEPLOYMENT=DeepSeek-R1
-   ```
-   > **Warning:** Never commit your `.env` file to source control. It's already in `.gitignore`.
-
-3. Install dependencies:
-   ```bash
-   go mod download
-   ```
-
-4. Run the application:
-   ```bash
-   go run src/main.go
-   ```
-
-The application will start on http://localhost:3000
-
-### Docker Development
-
-Build and run the application using Docker:
-
-```bash
-docker build -t deepseek-go -f src/Dockerfile .
-docker run -p 3000:3000 --env-file .env deepseek-go
-```
-
 ### GitHub Codespaces Development
 
 This repository is configured for immediate development in GitHub Codespaces:
@@ -159,6 +111,54 @@ Once you've opened the project in [Codespaces](#github-codespaces), in [Dev Cont
     ```shell
     azd down --purge
     ```
+
+### Prerequisites
+
+- Go v1.23 or later
+- Docker
+- Azure Developer CLI (azd) v1.13 or later _(support for docker as a language in the `azure.yaml` is required)_
+- Azure subscription with permissions to create resources
+
+### Local Development
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Azure-Samples/deepseek-go
+   cd deepseek-go
+   ```
+
+2. Create a `.env` file with required configuration:
+
+   > 📝 You can copy the `.env.example` file and fill in your values.
+_To acquire the following values, after using azd to deploy the application, run the following command in your terminal: `azd env get-values | grep "AZURE_INFERENCE_ENDPOINT" && azd env get-values | grep "AZURE_TENANT_ID"`_
+
+   ```
+   AZURE_TENANT_ID=<your-tenant-id>
+   AZURE_INFERENCE_ENDPOINT=<your-azure-ai-endpoint>
+   AZURE_DEEPSEEK_DEPLOYMENT=DeepSeek-R1
+   ```
+   > ⚠️ Never commit your `.env` file to source control. It's already in `.gitignore`.
+
+3. Install dependencies:
+   ```bash
+   go mod download
+   ```
+
+4. Run the application:
+   ```bash
+   go run src/main.go
+   ```
+
+The application will start on http://localhost:3000
+
+### Docker Development
+
+Build and run the application using Docker:
+
+```bash
+docker build -t deepseek-go -f src/Dockerfile .
+docker run -p 3000:3000 --env-file .env deepseek-go
+```
 
 ## Project Structure
 
