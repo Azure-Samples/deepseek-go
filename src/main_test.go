@@ -94,6 +94,10 @@ func makeRESTCall(h *handlers, messages []Message) (string, error) {
 	return originalMakeRESTCall(h, messages)
 }
 
+func teardown() {
+	mockRESTCallFunc = nil
+}
+
 // mockTokenCredential implements azcore.TokenCredential for testing purposes
 type mockTokenCredential struct {
 	token azcore.AccessToken
@@ -106,6 +110,7 @@ func (m *mockTokenCredential) GetToken(ctx context.Context, opts policy.TokenReq
 
 // TestMakeRESTCall_Success tests the makeRESTCall function for a successful REST API call
 func TestMakeRESTCall_Success(t *testing.T) {
+	defer teardown()
 	// Setup mock HTTP server
 	mockResponse := `{"choices":[{"message":{"content":"Hello, how can I help you?"}}]}`
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -144,8 +149,9 @@ func TestMakeRESTCall_Success(t *testing.T) {
 	}
 }
 
-// TestMakeRESTCall_InvalidURL tests the makeRESTCall function for an invalid URL
-func TestMakeRESTCall_InvalidJSONResponse(t *testing.T) {
+// TestMakeRESTCall_ReturnsInvalidJSON tests the makeRESTCall function for returning an invalid JSON response
+func TestMakeRESTCall_ReturnsInvalidJSON(t *testing.T) {
+	defer teardown()
 	// Setup mock HTTP server to return invalid JSON
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -182,6 +188,7 @@ func TestMakeRESTCall_InvalidJSONResponse(t *testing.T) {
 
 // TestMakeRESTCall_TokenError tests the makeRESTCall function for token retrieval errors
 func TestMakeRESTCall_TokenError(t *testing.T) {
+	defer teardown()
 	h := &handlers{
 		config: &Config{
 			ModelDeploymentURL: "http://example.com",
