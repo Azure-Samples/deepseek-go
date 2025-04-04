@@ -155,7 +155,6 @@ _To acquire the following values, after using azd to deploy the application, run
 To run the tests in `main_test.go`, ensure you are in the `src` directory and run the following command(s):
 
 ```bash
-cd deepseek-go/src
 go test ./... -v
 ```
 
