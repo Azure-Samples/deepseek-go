@@ -125,9 +125,10 @@ Once you've opened the project in [Codespaces](#github-codespaces), in [Dev Cont
    ```bash
    git clone https://github.com/Azure-Samples/deepseek-go
    cd deepseek-go
+   cd src
    ```
 
-2. Create a `.env` file with required configuration:
+2. Create a `.env` file inside the `src` directory with required configuration:
 
    > 📝 You can copy the `.env.example` file and fill in your values.
 _To acquire the following values, after using azd to deploy the application, run the following command in your terminal: `azd env get-values | grep "AZURE_INFERENCE_ENDPOINT" && azd env get-values | grep "AZURE_TENANT_ID"`_
@@ -146,10 +147,19 @@ _To acquire the following values, after using azd to deploy the application, run
 
 4. Run the application:
    ```bash
-   go run src/main.go
+   go run main.go
    ```
 
-The application will start on http://localhost:3000
+### Running Tests
+
+To run the tests in `main_test.go`, ensure you are in the `src` directory and run the following command(s):
+
+```bash
+cd deepseek-go/src
+go test ./... -v
+```
+
+This will execute all the test cases and display detailed output for each test.
 
 ### Docker Development
 
