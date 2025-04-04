@@ -1,17 +1,23 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"html/template"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 )
 
 func setupTestHandlers() *handlers {
 	config := &Config{
-		AzureOpenAIKey:     "test-key",
 		ModelDeploymentURL: "test-url",
-		ModelName:          "test-model",
+		ModelName:          "DeepSeek-R1",
 		Port:               "3000",
 		Template:           template.Must(template.ParseFiles("static/index.html")),
 	}
@@ -23,16 +29,13 @@ func TestHealthHandler(t *testing.T) {
 	// Set up the handlers with a test configuration
 	h := setupTestHandlers()
 
-	// Create a new HTTP GET request targeting the /health endpoint
 	req, err := http.NewRequest("GET", "/health", nil)
 	if err != nil {
-		t.Fatal(err) // Fail the test if there's an issue creating the request
+		t.Fatal(err)
 	}
 
-	// Create a ResponseRecorder to record the response
 	recorder := httptest.NewRecorder()
 
-	// Wrap the healthHandler function in an http.HandlerFunc
 	handler := http.HandlerFunc(h.healthHandler)
 
 	// Serve the HTTP request
@@ -43,9 +46,7 @@ func TestHealthHandler(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
-	// Define the expected response body
 	expected := "Healthy."
-	// Verify that the actual response body matches the expected one
 	if recorder.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v", recorder.Body.String(), expected)
 	}
@@ -62,16 +63,147 @@ func TestIndexHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Create a ResponseRecorder to capture the HTTP response
 	recorder := httptest.NewRecorder()
-	// Wrap the indexHandler function into an http.HandlerFunc
+
 	handler := http.HandlerFunc(h.indexHandler)
 
-	// Serve the HTTP request using the handler
 	handler.ServeHTTP(recorder, req)
 
 	// Verify that the returned HTTP status code is 200 OK
 	if status := recorder.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+}
+
+// Create a test implementation of the makeRESTCall function
+var originalMakeRESTCall func(h *handlers, messages []Message) (string, error)
+
+// Save the original function before tests and restore after
+func init() {
+	originalMakeRESTCall = makeRESTCall
+}
+
+// Mock function for makeRESTCall that can be set during tests
+var mockRESTCallFunc func(messages []Message) (string, error)
+
+// Override the makeRESTCall function for testing
+func makeRESTCall(h *handlers, messages []Message) (string, error) {
+	if mockRESTCallFunc != nil {
+		return mockRESTCallFunc(messages)
+	}
+	return originalMakeRESTCall(h, messages)
+}
+
+func teardown() {
+	mockRESTCallFunc = nil
+}
+
+// mockTokenCredential implements azcore.TokenCredential for testing purposes
+type mockTokenCredential struct {
+	token azcore.AccessToken
+	err   error
+}
+
+func (m *mockTokenCredential) GetToken(ctx context.Context, opts policy.TokenRequestOptions) (azcore.AccessToken, error) {
+	return m.token, m.err
+}
+
+// TestMakeRESTCall_Success tests the makeRESTCall function for a successful REST API call
+func TestMakeRESTCall_Success(t *testing.T) {
+	defer teardown()
+	// Setup mock HTTP server
+	mockResponse := `{"choices":[{"message":{"content":"Hello, how can I help you?"}}]}`
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, mockResponse)
+	}))
+	defer server.Close()
+
+	// Setup handlers with mock config
+	h := &handlers{
+		config: &Config{
+			ModelDeploymentURL: server.URL,
+			ModelName:          "DeepSeek-R1",
+		},
+	}
+
+	// Setup mock credential
+	cred = &mockTokenCredential{
+		token: azcore.AccessToken{
+			Token:     "fake-token",
+			ExpiresOn: time.Now().Add(1 * time.Hour),
+		},
+		err: nil,
+	}
+
+	// Execute makeRESTCall
+	messages := []Message{{Role: "user", Content: "Hello"}}
+	resp, err := h.makeRESTCall(messages)
+	if err != nil {
+		t.Fatalf("makeRESTCall returned error: %v", err)
+	}
+
+	if resp != mockResponse {
+		t.Errorf("Expected response %v, got %v", mockResponse, resp)
+	}
+}
+
+// TestMakeRESTCall_ReturnsInvalidJSON tests the makeRESTCall function for returning an invalid JSON response
+func TestMakeRESTCall_ReturnsInvalidJSON(t *testing.T) {
+	defer teardown()
+	// Setup mock HTTP server to return invalid JSON
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "invalid-json")
+	}))
+	defer server.Close()
+
+	h := &handlers{
+		config: &Config{
+			ModelDeploymentURL: server.URL,
+			ModelName:          "DeepSeek-R1",
+		},
+	}
+
+	cred = &mockTokenCredential{
+		token: azcore.AccessToken{
+			Token:     "fake-token",
+			ExpiresOn: time.Now().Add(1 * time.Hour),
+		},
+		err: nil,
+	}
+
+	messages := []Message{{Role: "user", Content: "Hello"}}
+	resp, err := h.makeRESTCall(messages)
+	if err != nil {
+		t.Fatalf("Expected no error from makeRESTCall, got %v", err)
+	}
+
+	if resp != "invalid-json" {
+		t.Errorf("Expected response 'invalid-json', got %v", resp)
+	}
+}
+
+// TestMakeRESTCall_TokenError tests the makeRESTCall function for token retrieval errors
+func TestMakeRESTCall_TokenError(t *testing.T) {
+	defer teardown()
+	h := &handlers{
+		config: &Config{
+			ModelDeploymentURL: "http://example.com",
+			ModelName:          "DeepSeek-R1",
+		},
+	}
+
+	cred = &mockTokenCredential{
+		token: azcore.AccessToken{},
+		err:   fmt.Errorf("token error"),
+	}
+
+	messages := []Message{{Role: "user", Content: "Hello"}}
+	_, err := h.makeRESTCall(messages)
+	if err == nil || !strings.Contains(err.Error(), "token error") {
+		t.Fatalf("Expected token error from makeRESTCall, got %v", err)
 	}
 }
