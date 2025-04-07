@@ -8,7 +8,7 @@
 
 [![Open in GitHub Codespaces](https://img.shields.io/badge/Open_in_GitHub_Codespaces-181717?style=flat-square&logo=github&logoColor=white)](https://codespaces.new/Azure-Samples/deepseek-go)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
-![Go version](https://img.shields.io/badge/Go->=1.23-00ADD8?style=flat-square&logo=go&logoColor=white)
+![Go version](https://img.shields.io/badge/Go->=1.24-00ADD8?style=flat-square&logo=go&logoColor=white)
 
 This sample demonstrates how to build a web chat application using Go that integrates with DeepSeek-R1 model hosted in Azure AI Foundry. The application provides a web interface for interacting with the model, deployed securely using Azure Container Registry (ACR) and Azure Container Apps.
 
@@ -21,7 +21,7 @@ This template, the application code and configuration it contains, has been buil
 
 ## Technology Stack
 
-- **Application base language**: Go (1.23+)
+- **Application base language**: Go (1.24+)
 - **Authentication**: Microsoft Entra ID (formerly Azure AD)
 - **API Integration**: Azure AI Foundry Services with DeepSeek-R1 model
 - **Infrastructure**: 
@@ -114,7 +114,7 @@ Once you've opened the project in [Codespaces](#github-codespaces), in [Dev Cont
 
 ### Prerequisites
 
-- Go v1.23 or later
+- Go v1.24 or later
 - Docker
 - Azure Developer CLI (azd) v1.13 or later _(support for docker as a language in the `azure.yaml` is required)_
 - Azure subscription with permissions to create resources
