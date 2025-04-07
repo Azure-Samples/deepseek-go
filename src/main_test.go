@@ -121,12 +121,10 @@ func TestMakeRESTCall_Success(t *testing.T) {
 	defer server.Close()
 
 	// Setup handlers with mock config
-	h := &handlers{
-		config: &Config{
-			ModelDeploymentURL: server.URL,
-			ModelName:          "DeepSeek-R1",
-		},
-	}
+	h := initHandlers(&Config{
+		ModelDeploymentURL: server.URL,
+		ModelName:          "DeepSeek-R1",
+	})
 
 	// Setup mock credential
 	cred = &mockTokenCredential{
@@ -160,12 +158,11 @@ func TestMakeRESTCall_ReturnsInvalidJSON(t *testing.T) {
 	}))
 	defer server.Close()
 
-	h := &handlers{
-		config: &Config{
-			ModelDeploymentURL: server.URL,
-			ModelName:          "DeepSeek-R1",
-		},
-	}
+	// Setup handlers with mock config
+	h := initHandlers(&Config{
+		ModelDeploymentURL: server.URL,
+		ModelName:          "DeepSeek-R1",
+	})
 
 	cred = &mockTokenCredential{
 		token: azcore.AccessToken{
@@ -189,12 +186,12 @@ func TestMakeRESTCall_ReturnsInvalidJSON(t *testing.T) {
 // TestMakeRESTCall_TokenError tests the makeRESTCall function for token retrieval errors
 func TestMakeRESTCall_TokenError(t *testing.T) {
 	defer teardown()
-	h := &handlers{
-		config: &Config{
-			ModelDeploymentURL: "http://example.com",
-			ModelName:          "DeepSeek-R1",
-		},
-	}
+
+	// Setup handlers with mock config
+	h := initHandlers(&Config{
+		ModelDeploymentURL: "http://example.com",
+		ModelName:          "DeepSeek-R1",
+	})
 
 	cred = &mockTokenCredential{
 		token: azcore.AccessToken{},

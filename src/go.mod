@@ -1,6 +1,7 @@
 module github.com/Azure-Samples/deepseek-go
 
 go 1.23.1
+
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.17.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.2

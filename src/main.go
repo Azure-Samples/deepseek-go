@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -47,6 +46,28 @@ type ErrorResponse struct {
 // Groups together HTTP handler functions and holds a reference to the application's config
 type handlers struct {
 	config *Config
+	client *http.Client
+}
+
+type authTransport struct {
+	transport http.RoundTripper
+	token     azcore.AccessToken
+}
+
+func (t *authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if t.token.ExpiresOn.Before(time.Now()) {
+		var err error
+		t.token, err = cred.GetToken(req.Context(), policy.TokenRequestOptions{
+			Scopes: []string{"https://cognitiveservices.azure.com/.default"},
+		})
+		if err != nil {
+			req.Body.Close()
+			return nil, fmt.Errorf("failed to refresh authentication token: %w", err)
+		}
+	}
+	req2 := req.Clone(req.Context())
+	req2.Header.Set("Authorization", "Bearer "+t.token.Token)
+	return t.transport.RoundTrip(req2)
 }
 
 // Mutex to prevent concurrent processing
@@ -146,7 +167,15 @@ func VarsConfig() (*Config, error) {
 
 // initHandlers initializes and returns a new handlers instance with the given config
 func initHandlers(config *Config) *handlers {
-	return &handlers{config: config}
+	return &handlers{
+		config: config,
+		client: &http.Client{
+			Transport: &authTransport{
+				transport: http.DefaultTransport,
+				token:     azcore.AccessToken{},
+			},
+		},
+	}
 }
 
 // indexHandler renders the main page using the template defined in the config (index.html)
@@ -236,53 +265,18 @@ func (h *handlers) makeRESTCall(messages []Message) (string, error) {
 		Model:    h.config.ModelName,
 	}
 
-	// Marshal the request body into JSON
 	reqBodyBytes, err := json.Marshal(reqBodyStruct)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
-	log.Printf("REST API call to %s | Model: %s", h.config.ModelDeploymentURL, h.config.ModelName)
-
-	// Create a new POST request with the JSON payload
 	req, err := http.NewRequest("POST", h.config.ModelDeploymentURL, bytes.NewBuffer(reqBodyBytes))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
-
-	// Get token for Azure Cognitive Services
-	ctx := context.Background()
-	token, err := cred.GetToken(ctx, policy.TokenRequestOptions{
-		Scopes: []string{"https://cognitiveservices.azure.com/.default"},
-	})
-	if err != nil {
-		return "", fmt.Errorf("failed to get authentication token: %w", err)
-	}
-
-	// Check if token has expired and refresh if necessary
-	// Note: The token expiration time is not always accurate, so we check if the token is expired
-	now := time.Now()
-	if now.After(token.ExpiresOn) {
-		log.Printf("Token has expired, getting a new one")
-		newToken, err := cred.GetToken(ctx, policy.TokenRequestOptions{
-			Scopes: []string{"https://cognitiveservices.azure.com/.default"},
-		})
-		if err != nil {
-			return "", fmt.Errorf("failed to refresh authentication token: %w", err)
-		}
-		token = newToken
-	}
-
-	// Log token expiration info for debugging purposes
-	// log.Printf("Using token that expires at: %v", token.ExpiresOn)
-
-	// Set the headers for the request
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer"+" "+token.Token)
 
-	// Initialize a new HTTP client and send the request
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := h.client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to send request: %w", err)
 	}
