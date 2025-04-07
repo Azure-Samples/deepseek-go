@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/go:1.23
+FROM mcr.microsoft.com/devcontainers/go:1.24
 
 # Install additional OS packages
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
