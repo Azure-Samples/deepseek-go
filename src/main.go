@@ -61,11 +61,13 @@ func (t *authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 			Scopes: []string{"https://cognitiveservices.azure.com/.default"},
 		})
 		if err != nil {
-			return nil, err
+			req.Body.Close()
+			return nil, fmt.Errorf("failed to refresh authentication token: %w", err)
 		}
 	}
-	req.Header.Set("Authorization", "Bearer "+t.token.Token)
-	return t.transport.RoundTrip(req)
+	req2 := req.Clone(req.Context())
+	req2.Header.Set("Authorization", "Bearer "+t.token.Token)
+	return t.transport.RoundTrip(req2)
 }
 
 // Mutex to prevent concurrent processing
@@ -268,24 +270,23 @@ func (h *handlers) makeRESTCall(messages []Message) (string, error) {
 		return "", fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
-	requestFunc := func() (*http.Response, error) {
-		req, err := http.NewRequest("POST", h.config.ModelDeploymentURL, bytes.NewBuffer(reqBodyBytes))
-		if err != nil {
-			return nil, fmt.Errorf("failed to create request: %w", err)
-		}
-		req.Header.Set("Content-Type", "application/json")
-		return h.client.Do(req)
-	}
-
-	resp, err := requestFunc()
+	req, err := http.NewRequest("POST", h.config.ModelDeploymentURL, bytes.NewBuffer(reqBodyBytes))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to create request: %w", err)
 	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := h.client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to send request: %w", err)
+	}
+	// Ensure the response body is closed properly
 	defer resp.Body.Close()
 
+	// Read and return the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("failed to read response: %w", err)
+		return "", fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	return string(body), nil
