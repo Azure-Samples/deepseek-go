@@ -33,8 +33,14 @@ This template, the application code and configuration it contains, has been buil
 - **IaC**: Bicep for infrastructure deployment
 - **Web Interface**: HTML/CSS with vanilla JavaScript
 
-![Screenshot of AI chat window](./docs/images/ai-chat-window.png)
+<img src="./docs/images/ai-chat-window.png" alt="Screenshot of AI chat window" width="500">
+
 ![azure deployment architecture diagram](./docs/images/deepseek-go-architecture-diagram.png)
+
+<video width="640" height="360" controls>
+  <source src="./docs/videos/deepseek-go-walkthrough.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 
 ## Key Components
