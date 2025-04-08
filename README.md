@@ -3,6 +3,11 @@
 
 <img src="./docs/images/icon.png" alt="" align="center" height="64" /> <img src="./docs/images/go-logo.png" alt="" align="center" height="104" />
 
+<video width="640" height="360" controls>
+  <source src="./docs/videos/deepseek-go-walkthrough.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 
 # DeepSeek-R1 Go Starter
 
@@ -36,11 +41,6 @@ This template, the application code and configuration it contains, has been buil
 <img src="./docs/images/ai-chat-window.png" alt="Screenshot of AI chat window" width="500">
 
 ![azure deployment architecture diagram](./docs/images/deepseek-go-architecture-diagram.png)
-
-<video width="640" height="360" controls>
-  <source src="./docs/videos/deepseek-go-walkthrough.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
 
 
 ## Key Components
