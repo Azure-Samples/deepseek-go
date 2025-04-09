@@ -3,12 +3,6 @@
 
 <img src="./docs/images/icon.png" alt="" align="center" height="64" /> <img src="./docs/images/go-logo.png" alt="" align="center" height="104" />
 
-<video width="640" height="360" controls>
-  <source src="./docs/videos/deepseek-go-walkthrough.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-
 # DeepSeek-R1 Go Starter
 
 [![Open in GitHub Codespaces](https://img.shields.io/badge/Open_in_GitHub_Codespaces-181717?style=flat-square&logo=github&logoColor=white)](https://codespaces.new/Azure-Samples/deepseek-go)
@@ -18,6 +12,8 @@
 This sample demonstrates how to build a web chat application using Go that integrates with DeepSeek-R1 model hosted in Azure AI Foundry. The application provides a web interface for interacting with the model, deployed securely using Azure Container Registry (ACR) and Azure Container Apps.
 
 :star: If you like this sample, star it on GitHub — it helps a lot!
+
+![Animation showing the app in action](./docs/videos/deepseek-go-deployment.gif)
 
 </div>
 
