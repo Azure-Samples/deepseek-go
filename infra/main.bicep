@@ -11,6 +11,8 @@ param location string
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
+@description('Flag to decide where to create OpenAI role for current user')
+param createRoleForUser bool = true
 
 param acaExists bool = false
 
@@ -153,7 +155,7 @@ module appupdate 'appupdate.bicep' = {
   }
 }
 
-module aiServicesRoleBackend 'core/security/role.bicep' = {
+module aiServicesRoleBackend 'core/security/role.bicep' = if (createRoleForUser) {
   scope: resourceGroup
   name: 'aiservices-role-backend'
   params: {
