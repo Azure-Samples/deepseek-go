@@ -39,7 +39,7 @@ This template, the application code and configuration it contains, has been buil
 ![azure deployment architecture diagram](./docs/images/deepseek-go-architecture-diagram.png)
 
 
-## Key Components
+## Features
 
 ### Go Application Structure
 
@@ -235,3 +235,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Resources
+- [Azure AI Foundry](https://learn.microsoft.com/azure/ai-foundry/)
+- [Azure AI Services](https://learn.microsoft.com/azure/ai-services/)
